@@ -1,24 +1,24 @@
 
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, UIManager, LayoutAnimation, Platform, ActivityIndicator, Keyboard } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { API, API_LOGIN, API_SIGNUP } from '../constants/API';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
+import { loginAction } from '../redux/ducks/blogAuth';
 import axios from 'axios';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-} //Needs to be manually enabled for android
+  if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  } //Needs to be manually enabled for android
 
 export default function SignInSignUpScreen({ navigation }) {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorText, setErrorText] = useState('')
-
   const [isLogin, setIslogin] =useState(true)
+  const dispatch = useDispatch()
 
   async function login() {
     console.log("---- Login time ----");
@@ -31,12 +31,12 @@ export default function SignInSignUpScreen({ navigation }) {
         password,
       });
       console.log("Success logging in!");
-      // console.log(response);
-      await AsyncStorage.setItem("token", response.data.access_token);
+      // console.log(response.data.access_token)
+      dispatch({...loginAction(), payload: response.data.access_token})
       setLoading(false);
-      //setUsername("");
-      //setPassword("");
-      navigation.navigate("LoggedInTabStack");   // go to log in page if username and password are correct
+      setUsername("");
+      setPassword("");
+      navigation.navigate("Logged In");   // go to log in page if username and password are correct
     } catch (error) {
       setLoading(false);
       console.log("Salah logging in!");
@@ -50,7 +50,7 @@ export default function SignInSignUpScreen({ navigation }) {
 
   async function signUp() {
     if (password != confirmPassword) {
-      setErrorText("Your passwords don't match. Check and try again.")
+      setErrorText("Your password doesn't match. Check and try again.")
     } else {
       try {
         setLoading(true);
@@ -72,6 +72,9 @@ export default function SignInSignUpScreen({ navigation }) {
         console.log("Error logging in!");
         console.log(error.response);
         setErrorText(error.response.data.description);
+        if (error.response.status = 404) {
+          setErrorText("User does not exist!")
+        }
       }
     }
   }
@@ -86,7 +89,7 @@ export default function SignInSignUpScreen({ navigation }) {
           style={styles.textInput}
           placeholder="Username:"
           placeholderTextColor="#003f5c"
-          // value={username}
+          value={username}
           onChangeText={(username) => setUsername(username)}
         />
       </View>
@@ -97,6 +100,7 @@ export default function SignInSignUpScreen({ navigation }) {
           placeholder="Magicword:"
           placeholderTextColor="#003f5c"
           secureTextEntry={true}
+          value={password}
           onChangeText={(pw) => setPassword(pw)}
         />
       </View>
@@ -129,15 +133,14 @@ export default function SignInSignUpScreen({ navigation }) {
           LayoutAnimation.configureNext({
             duration: 700,
             create: { type: 'linear', property: 'opacity' },
-            update: { type: 'spring', springDamping: 0.4 }
+            update: { type: 'spring', springDamping: 0.8 }
           });
           setIslogin(!isLogin);
           setErrorText("");
         }}>
           <Text style={styles.switchText}> {isLogin ? "No account? Sign up now." : "Already have an account? Log in here."}</Text>
       </TouchableOpacity> 
-    </View>
-    
+    </View>    
   );
 }
 

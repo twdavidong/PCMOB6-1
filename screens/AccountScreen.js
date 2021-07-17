@@ -1,28 +1,25 @@
 import React, {useState, useEffect} from "react";
 import { Button, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { commonStyles } from "../styles/commonStyles";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { lightStyles } from "../styles/commonStyles";
 import axios from "axios";
+import { API, API_WHOAMI } from "../constants/API";
+import { useSelector } from "react-redux";
 
-const API = "https://repairaman.pythonanywhere.com";
-const API_WHOAMI = "/whoami";
+export default function AccountScreen({ navigation }) {
+  
+  const [username, setUsername] = useState(null);
+  const styles = lightStyles;
+  const token = useSelector((state) => state.auth.token)
 
-
-  export default function AccountScreen({ navigation }) {
-  const [username, setUsername] = useState("");
 
   function signOut() {
     AsyncStorage.removeItem("token");
-    navigation.navigate("SignIn");
+    navigation.navigate("SignInSignUp");
   }
 
   async function getUsername () {
     console.log("----Getting Username -----");
-    const token = await AsyncStorage.getItem("token");  // first await....
-    if (token == null) {
-      signOut();
-      return;
-    }
     console.log(`Token is ${token}`);
     
     try {
@@ -30,6 +27,7 @@ const API_WHOAMI = "/whoami";
         headers: { Authorization: `JWT ${token}` },
       });
           console.log("Got the username!");
+          setUsername(response.data.username);
           console.log(response);
     } catch (error) {
       console.log("Error getting user name!");
@@ -37,11 +35,12 @@ const API_WHOAMI = "/whoami";
         console.log(error.response.data);
         if (error.response.data.status_code === 401 ) {
           signOut();
+          navigation.navigate("SignInSignUp")
         }
       } else {
         console.log(error);
       }
-      // to go back log in screen?
+      navigation.navigate("SignInSignUp")   // to go back log in screen?
      }
   }
 
