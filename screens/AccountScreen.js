@@ -1,29 +1,30 @@
 import React, {useState, useEffect} from "react";
-import { Button, StyleSheet, Text, View, ActivityIndicator } from "react-native";
-import { commonStyles } from "../styles/commonStyles";
-import { lightStyles } from "../styles/commonStyles";
+import { ActivityIndicator, TouchableOpacity, Text, View, Switch, Image, Animated, TouchableWithoutFeedback } from "react-native";
+import { commonStyles, lightStyles, darkStyles } from "../styles/commonStyles";
 import axios from "axios";
 import { API, API_WHOAMI } from "../constants/API";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import {  changeModeAction, deletePicAction } from '../redux/ducks/accountPref';
+import { logoutAction } from "../redux/ducks/blogAuth";
 
 export default function AccountScreen({ navigation }) {
   
   const [username, setUsername] = useState(null);
-  const styles = lightStyles;
-  const token = useSelector((state) => state.auth.token)
+  
+  const token = useSelector((state) => state.auth.token);
+  const dispatch = useDispatch();
 
+  const profilePicture = useSelector((state) => state.accountPrefs.profilePicture);
+  const isDark = useSelector((state) => state.accountPrefs.isDark);
+  const styles = { ...commonStyles, ...isDark ? darkStyles : lightStyles };
 
-  function signOut() {
-    AsyncStorage.removeItem("token");
-    navigation.navigate("SignInSignUp");
-  }
-
+ 
   async function getUsername () {
     console.log("----Getting Username -----");
     console.log(`Token is ${token}`);
     
     try {
-      const response = await axios.get(API + API_WHOAMI, {     // second await....
+      const response = await axios.get(API + API_WHOAMI, {     
         headers: { Authorization: `JWT ${token}` },
       });
           console.log("Got the username!");
@@ -44,12 +45,57 @@ export default function AccountScreen({ navigation }) {
      }
   }
 
+  function signOut() {
+    dispatch(logoutAction())
+    navigation.navigate("SignInSignUp");
+  }
+
+  function switchMode() {
+    dispatch(changeModeAction())
+  }
+
+  useEffect(() => {
+    console.log("Setting up Nav Listener");
+    const removeListener = navigation.addListener("focus", () => {
+      console.log("Running Nav Listener");
+      setUsername(<ActivityIndicator />);
+      getUsername();
+    });
+      getUsername();
+      return removeListener;
+    }, []);
+
   return (
-    <View style={commonStyles.container}>
-      <Text>Account Screen</Text>
-      <Button title="Sign out" onPress={signOut} />
-    </View>
+    <View style={[styles.container, {alignItems: "center"}]}> // Start of return() View =========================================
+
+      <Text style= {[styles.title, styles.text, { margin: 30}]}>Hi {username} !</Text>
+
+// ======================= the Profile Picture =================================
+        <View style={{height: profilePicture == null ? 0 : 320, justifyContent: "center"}}></View>
+
+
+      <TouchableOpacity onPress={() => profilePicture == null ? navigation.navigate("Camera") : deletePhoto()}>
+          <Text style={{ marginTop: 10, fontSize: 20, color: "#0000EE" }}> { profilePicture == null ? "No profile picture. Click to take one." : "Delete this photo and take another one."} </Text>
+          </TouchableOpacity>
+// ======================= End of Profile Picture =================================
+
+// ======================= the Theme Switch =================================
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", margin: 20}}>
+        <Text style={[styles.content, styles.text]}> Dark Mode? </Text>
+        <Switch
+          value={isDark}
+          onChange={switchMode}/>
+      </View>
+// ======================= End of Theme Switch =================================      
+
+// ======================= the Sign Out Button =================================
+      <TouchableOpacity style={[styles.button]} onPress={signOut}>
+        <Text style={styles.buttonText}>
+          Sign Out
+        </Text>
+        </TouchableOpacity>
+// ======================= End of Sign Out Button =================================        
+    
+    </View>  // End of return() View =========================================
   );
 }
-
-const styles = StyleSheet.create({});

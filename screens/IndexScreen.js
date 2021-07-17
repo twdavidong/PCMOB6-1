@@ -1,18 +1,20 @@
 import React from "react";
 import { StyleSheet, Text, View, RefreshControl, TouchableOpacity, FlatList, ImageBackground } from "react-native";
 import { useEffect, useState } from "react";
-import { commonStyles, lightStyles } from "../styles/commonStyles";
+import { commonStyles, lightStyles, darkStyles } from "../styles/commonStyles";
 import { FontAwesome } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { API, API_POSTS } from "../constants/API";
 import background from "../assets/image.jpg";
+import { useSelector } from "react-redux";
 
 export default function IndexScreen({ navigation, route }) {
 
   const[post, setPost]=useState([]);
   const[refreshing, setRefreshing]=useState(false);
-  const styles = lightStyles;
+  const isDark = useSelector((state) => state.accountPrefs.isDark);
+  const styles = isDark ? darkStyles : lightStyles;
+  const token = useSelector((state) => state.auth.token);
 
   useEffect(()  => {
     navigation.setOptions({
@@ -22,16 +24,24 @@ export default function IndexScreen({ navigation, route }) {
         </TouchableOpacity>
       ),
     });
-
-  }
-  );
+  });
 
   useEffect(() => {
     getPosts();
   },[]);
 
+  useEffect(() => {
+    console.log("Setting up NAV Listerner");
+    const removeListener = navigation.addListener("focus",()=> {
+      console.log("Running Nav Listerner"); 
+      getPosts();
+    });
+      getPosts();
+      return removeListener;
+    },[]);
+
   async function getPosts() {
-    const token = await AsyncStorage.getItem("token");
+    // const token = await AsyncStorage.getItem("token");
     try {
       const response = await axios.get(API + API_POSTS, {
         headers: { Authorization: `JWT ${token}` },
@@ -41,40 +51,40 @@ export default function IndexScreen({ navigation, route }) {
       return "completed"
     } catch (error) {
       console.log (error.response.data);
+      console.log (token)
       if (error.response.data.error = "Invalid token") {
         navigation.navigate("SignInSignUp");
       }
     }
   }
 
-
-async function onRefresh() {
-  setRefreshing(true);
-  const response = await getPosts()
-  setRefreshing(false);
-}
-
-useEffect(() => {
-  console.log("Setting up NAV Listerner");
-  const removeListener = navigation.addListener("focus",()=> {
-    console.log("Running Nav Listerner"); 
-    getPosts();
-    return removeListener;
-  },[]);
-})
-
-  function addPost(){
-
+  async function onRefresh() {
+    setRefreshing(true);
+    const response = await getPosts()
+    setRefreshing(false);
   }
 
-  function deletePost() {
+  function addPost(){
+    navigation.navigate("Add")
+  }
 
+  async function deletePost(id) {
+    console.log ("Deleting " + id);
+    try {
+      const response = await axios.delete(API + API_POSTS + `/${id}`, {
+        headers : { Authorization : `JWT ${token}` },
+      })
+      console.log(response);
+      setPost(post.filter((item) => item.id !== id));
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   function renderItem({item}) {
     return (
       <TouchableOpacity onPress={() => 
-        navigation.navigate("Details",{post: item})}>
+        navigation.navigate("Details",{id : item.id})}>
         <ImageBackground source={background} resizeMode="cover" style={styles.image}>
         <View style={{ 
           padding: 10,
@@ -86,10 +96,11 @@ useEffect(() => {
           justifyContent: "space-between",
         }}>
           <Text style={styles.baseText}>{item.title}</Text>
-          <TouchableOpacity onPress={deletePost}>
+          <TouchableOpacity onPress={deletePost(item.id)}>
             <FontAwesome name= "trash" size={20} color ="#b800000" />
-      </TouchableOpacity>
-      </View></ImageBackground>
+          </TouchableOpacity>
+        </View>
+        </ImageBackground>
       </TouchableOpacity>
     );
   }

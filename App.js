@@ -14,6 +14,7 @@ function App() {
 //  const [loading, setLoading] = useState(true);
  // const [signedIn, setSignedIn] = useState(false);
   const token = useSelector((state) => state.auth.token);
+  const isDark = useSelector((state) => state.accountPrefs.isDark);
   
   /*
   async function loadToken() {
@@ -35,6 +36,7 @@ function App() {
     */
    return (
     <NavigationContainer>
+      <StatusBar style={isDark ? "light" : "dark"}/>
       <Stack.Navigator
         mode="modal"
         headerMode="none"
