@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, UIManager, LayoutAnimation, Platform, ActivityIndicator, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, UIManager, LayoutAnimation, Platform, ActivityIndicator, Keyboard, Animated } from 'react-native';
 import { API, API_LOGIN, API_SIGNUP } from '../constants/API';
 import { useDispatch } from 'react-redux';
 import { loginAction } from '../redux/ducks/blogAuth';
@@ -31,7 +31,7 @@ export default function SignInSignUpScreen({ navigation }) {
         password,
       });
       console.log("Success logging in!");
-      // console.log(response.data.access_token)
+      console.log(response.data.access_token)
       dispatch({...loginAction(), payload: response.data.access_token})
       setLoading(false);
       setUsername("");
@@ -82,8 +82,8 @@ export default function SignInSignUpScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
-        {isLogin ? "Log In" : "Sign Up"}
-      </Text>
+            {isLogin ? "Log In" : "Sign Up"}
+          </Text>
       <View style={styles.inputView}>
         <TextInput
           style={styles.textInput}
@@ -93,7 +93,6 @@ export default function SignInSignUpScreen({ navigation }) {
           onChangeText={(username) => setUsername(username)}
         />
       </View>
-
       <View style={styles.inputView}>
         <TextInput
           style={styles.textInput}
@@ -137,9 +136,9 @@ export default function SignInSignUpScreen({ navigation }) {
           });
           setIslogin(!isLogin);
           setErrorText("");
-        }}>
+          }}>
           <Text style={styles.switchText}> {isLogin ? "No account? Sign up now." : "Already have an account? Log in here."}</Text>
-      </TouchableOpacity> 
+        </TouchableOpacity> 
     </View>    
   );
 }
@@ -150,6 +149,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  image: {
+    flex: 1,
+    justifyContent: "center"
   },
   title: {
     fontWeight: 'bold',
@@ -208,4 +211,7 @@ const styles = StyleSheet.create({
       <Text style={styles.link}>Sign Up</Text>
     </TouchableOpacity>
   </View> 
+ 
+ <ImageBackground source={background} resizeMode="cover" style={styles.image}>
+     </ImageBackground>
   */

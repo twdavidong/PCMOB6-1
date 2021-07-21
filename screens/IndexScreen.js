@@ -1,16 +1,15 @@
 import React from "react";
-import { StyleSheet, Text, View, RefreshControl, TouchableOpacity, FlatList, ImageBackground } from "react-native";
+import { StyleSheet, Text, View, RefreshControl, TouchableOpacity, FlatList } from "react-native";
 import { useEffect, useState } from "react";
-import { commonStyles, lightStyles, darkStyles } from "../styles/commonStyles";
+import { lightStyles, darkStyles } from "../styles/commonStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
 import { API, API_POSTS } from "../constants/API";
-import background from "../assets/image.jpg";
 import { useSelector } from "react-redux";
 
 export default function IndexScreen({ navigation, route }) {
 
-  const[post, setPost]=useState([]);
+  const[posts, setPosts]=useState([]);
   const[refreshing, setRefreshing]=useState(false);
   const isDark = useSelector((state) => state.accountPrefs.isDark);
   const styles = isDark ? darkStyles : lightStyles;
@@ -47,7 +46,7 @@ export default function IndexScreen({ navigation, route }) {
         headers: { Authorization: `JWT ${token}` },
       })
       console.log(response.data);
-      setPost(response.data);
+      setPosts(response.data);
       return "completed"
     } catch (error) {
       console.log (error.response.data);
@@ -75,40 +74,48 @@ export default function IndexScreen({ navigation, route }) {
         headers : { Authorization : `JWT ${token}` },
       })
       console.log(response);
-      setPost(post.filter((item) => item.id !== id));
+      setPosts(posts.filter((item) => item.id !== id));
     } catch (error) {
       console.log(error)
     }
+  }
+
+  const randomHexColor = (rgb) => {
+      for (var i=2, col=''; i<6; i++) {
+          col += (Math.random()*16|0).toString(16);
+      }
+      return '#'+col;
   }
 
   function renderItem({item}) {
     return (
       <TouchableOpacity onPress={() => 
         navigation.navigate("Details",{id : item.id})}>
-        <ImageBackground source={background} resizeMode="cover" style={styles.image}>
+       
         <View style={{ 
           padding: 10,
           paddingTop: 10,
           paddingBottom: 10,
           borderBottomColor: "#a3a3a3",
-          borderBottomWidth: 2,
           flexDirection: "row",
+          borderBottomWidth: 2,
           justifyContent: "space-between",
+          backgroundColor: randomHexColor(),
         }}>
           <Text style={styles.baseText}>{item.title}</Text>
-          <TouchableOpacity onPress={deletePost(item.id)}>
-            <FontAwesome name= "trash" size={20} color ="#b800000" />
+          <TouchableOpacity onPress={() => deletePost(item.id)}>
+            <FontAwesome name= "trash" size={20} color ="#b80000" />
           </TouchableOpacity>
         </View>
-        </ImageBackground>
+        
       </TouchableOpacity>
     );
   }
 
   return (
-    <View style={commonStyles.container}>
+    <View style={styles.container}>
       <FlatList
-        data={post}
+        data={posts}
         renderItem={renderItem}
         style={{width:"100%"}}
         keyExtractor={(item) => item.id.toString()}

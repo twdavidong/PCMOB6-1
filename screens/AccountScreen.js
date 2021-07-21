@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {  changeModeAction, deletePicAction } from '../redux/ducks/accountPref';
 import { logoutAction } from "../redux/ducks/blogAuth";
 
+
 export default function AccountScreen({ navigation }) {
   
   const [username, setUsername] = useState(null);
@@ -66,35 +67,29 @@ export default function AccountScreen({ navigation }) {
     }, []);
 
   return (
-    <View style={[styles.container, {alignItems: "center"}]}> // Start of return() View =========================================
+    <View style={[styles.container, {alignItems: "center"}]}> 
 
       <Text style= {[styles.title, styles.text, { margin: 30}]}>Hi {username} !</Text>
 
-// ======================= the Profile Picture =================================
         <View style={{height: profilePicture == null ? 0 : 320, justifyContent: "center"}}></View>
 
 
       <TouchableOpacity onPress={() => profilePicture == null ? navigation.navigate("Camera") : deletePhoto()}>
           <Text style={{ marginTop: 10, fontSize: 20, color: "#0000EE" }}> { profilePicture == null ? "No profile picture. Click to take one." : "Delete this photo and take another one."} </Text>
           </TouchableOpacity>
-// ======================= End of Profile Picture =================================
 
-// ======================= the Theme Switch =================================
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", margin: 20}}>
         <Text style={[styles.content, styles.text]}> Dark Mode? </Text>
         <Switch
           value={isDark}
           onChange={switchMode}/>
       </View>
-// ======================= End of Theme Switch =================================      
 
-// ======================= the Sign Out Button =================================
       <TouchableOpacity style={[styles.button]} onPress={signOut}>
         <Text style={styles.buttonText}>
           Sign Out
         </Text>
         </TouchableOpacity>
-// ======================= End of Sign Out Button =================================        
     
     </View>  // End of return() View =========================================
   );
