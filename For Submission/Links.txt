@@ -1,0 +1,12 @@
+Ong Teck Wee
+Submission of all Exercises, API Flask App and API Link.
+All links to Exercises, API Flask, API Link and Github link can be found under Links.txt
+
+Expo Snack Mini Exercise Link
+https://snack.expo.dev/@twdavidong/mini-exercise
+
+Blog API
+PythonAnywhere API
+https://www.pythonanywhere.com/user/repairaman/shares/c4261cf324e24b9599ff63e64ff7952f/
+Reactive Native Blog App
+https://github.com/twdavidong/PCMOB6-1.git
