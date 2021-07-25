@@ -15,7 +15,6 @@ export default function ShowScreen({ navigation, route }) {
 
 //  const[refreshing, setRefreshing]=useState(false);
   const isDark = useSelector((state) => state.accountPrefs.isDark);
- // const styles = isDark ? darkStyles : lightStyles;
   const styles = { ...commonStyles, ...isDark ? darkStyles : lightStyles };
   const token = useSelector((state) => state.auth.token);
 

@@ -1,7 +1,7 @@
 import React from "react";
-import { StyleSheet, Text, View, RefreshControl, TouchableOpacity, FlatList } from "react-native";
-import { useEffect, useState } from "react";
-import { lightStyles, darkStyles } from "../styles/commonStyles";
+import { StyleSheet, Text, View, RefreshControl, TouchableOpacity, FlatList, LayoutAnimation } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import { commonStyles, lightStyles, darkStyles } from "../styles/commonStyles";
 import { FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
 import { API, API_POSTS } from "../constants/API";
@@ -12,8 +12,9 @@ export default function IndexScreen({ navigation, route }) {
   const[posts, setPosts]=useState([]);
   const[refreshing, setRefreshing]=useState(false);
   const isDark = useSelector((state) => state.accountPrefs.isDark);
-  const styles = isDark ? darkStyles : lightStyles;
+  const styles = { commonStyles, ...isDark ? darkStyles : lightStyles};
   const token = useSelector((state) => state.auth.token);
+  
 
   useEffect(()  => {
     navigation.setOptions({
@@ -91,7 +92,6 @@ export default function IndexScreen({ navigation, route }) {
     return (
       <TouchableOpacity onPress={() => 
         navigation.navigate("Details",{id : item.id})}>
-       
         <View style={{ 
           padding: 10,
           paddingTop: 10,
@@ -107,27 +107,26 @@ export default function IndexScreen({ navigation, route }) {
             <FontAwesome name= "trash" size={20} color ="#b80000" />
           </TouchableOpacity>
         </View>
-        
       </TouchableOpacity>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={posts}
-        renderItem={renderItem}
-        style={{width:"100%"}}
-        keyExtractor={(item) => item.id.toString()}
-        refreshControl={<RefreshControl
-          colors={["#c3ca5c","#689f38"]}
-          refreshing={refreshing}
-          onRefresh={onRefresh}/>
-          }
-        />
-    </View>
+      <View style={styles.container}>
+        <FlatList
+            data={posts}
+            renderItem={renderItem}
+            style={{width:"100%"}}
+            keyExtractor={(item) => item.id.toString()}
+            refreshControl={<RefreshControl
+                                colors={["#c3ca5c","#689f38"]}
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}/>
+                            }
+          />
+          </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   image: {
@@ -142,4 +141,16 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold"
   },
-});
+  flatList: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  fadingContainer: {
+    padding: 20,
+    backgroundColor: "powderblue"
+  },
+  flatList: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+})
